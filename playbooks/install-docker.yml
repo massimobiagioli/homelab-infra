@@ -1,0 +1,65 @@
+---
+- name: Install Docker on Raspberry Pi
+  hosts: raspberry_pi
+  become: true
+  vars_files:
+    - vars/main.yml
+  tasks:
+    - name: Install prerequisites for APT
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
+        state: present
+        update_cache: true
+
+    - name: Add Docker's GPG key
+      ansible.builtin.shell: |
+        set -o pipefail
+        mkdir -p /etc/apt/keyrings
+        curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+      args:
+        executable: /bin/bash
+        creates: /etc/apt/keyrings/docker.gpg  # Run only if the key file doesn't already exist
+
+    - name: Add Docker's repository
+      ansible.builtin.apt_repository:
+        repo: "deb [arch=armhf signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian {{ ansible_distribution_release }} stable"
+        state: present
+
+    - name: Update APT cache
+      apt:
+        update_cache: true
+
+    - name: Install Docker
+      apt:
+        name: docker-ce
+        state: present
+
+    - name: Start and enable Docker service
+      systemd:
+        name: docker
+        enabled: true
+        state: started
+
+    - name: Add docker user user to the Docker group (optional)
+      ansible.builtin.user:
+        name: "{{ docker_user }}"
+        groups: docker
+        append: true
+        state: present
+
+    - name: Check Docker version
+      ansible.builtin.shell: |
+        set -o pipefail
+        docker --version
+      args:
+        executable: /bin/bash
+      register: docker_version
+      changed_when: false
+
+    - name: Display the installed Docker version
+      ansible.builtin.debug:
+        msg: "{{ docker_version.stdout }}"

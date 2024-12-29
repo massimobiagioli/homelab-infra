@@ -1,0 +1,30 @@
+---
+- name: Install Dockge using Docker Compose
+  hosts: raspberry_pi
+  become: true
+
+  tasks:
+    - name: Ensure the required directories exist
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+      loop:
+        - /opt/stacks
+        - /opt/dockge
+
+    - name: Download compose.yaml for Dockge
+      get_url:
+        url: "https://dockge.kuma.pet/compose.yaml?port=5001&stacksPath=%2Fopt%2Fstacks"
+        dest: /opt/dockge/compose.yaml
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Start Dockge using Docker Compose
+      community.docker.docker_compose_v2:
+        project_src: /opt/dockge
+        state: present
+      register: output
