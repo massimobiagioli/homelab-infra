@@ -1,0 +1,9 @@
+version: "3.9"
+services:
+  fastapi-starter:
+    image: localhost:5002/fastapi-starter-arm:0.0.1
+    container_name: fastapi-starter
+    ports:
+      - 4001:8000
+    restart: unless-stopped
+networks: {}

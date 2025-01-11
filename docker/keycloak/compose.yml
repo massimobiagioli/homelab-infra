@@ -1,0 +1,15 @@
+version: "3.9"
+services:
+  keycloak:
+    image: localhost:5002/keycloak-arm:0.0.1
+    container_name: keycloak
+    ports:
+      - 8088:8080
+      - 8443:8443
+    volumes:
+      - /opt/volumes/keycloak_data:/opt/keycloak/data
+    restart: unless-stopped
+    environment:
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+networks: {}

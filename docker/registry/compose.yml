@@ -1,0 +1,10 @@
+version: "3.8"
+services:
+  registry:
+    restart: unless-stopped
+    image: library/registry:latest
+    ports:
+      - 5002:5000
+    volumes:
+      - /opt/volumes:/var/lib/registry
+networks: {}
